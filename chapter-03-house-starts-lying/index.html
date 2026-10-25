@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#08070d">
+  <title>House of Restraints · Chapter III</title>
+  <style>
+    :root{color-scheme:dark;--ink:#08070d;--panel:#15101b;--line:#77516b;--gold:#e0bd78;--rose:#f0bed4;--teal:#57d7dc;--red:#a62346}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--ink);color:#f9edf1;font:17px/1.6 Georgia,serif;background-image:radial-gradient(circle at 50% 0,#4d153c66,transparent 45%),linear-gradient(#07060c,#0d0911);min-height:100vh}
+    button,a{font:inherit}.topbar{position:sticky;top:0;z-index:12;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 16px;background:#08070deb;border-bottom:1px solid #56354a;backdrop-filter:blur(9px);font-size:12px;letter-spacing:.12em}.topbar a{color:#d9c0cb;text-decoration:none}.progress{color:var(--gold);text-transform:uppercase}
+    main{width:min(1080px,100%);margin:auto;padding:18px 14px 70px}.scene{display:none;animation:enter .65s ease both}.scene.active{display:block}@keyframes enter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+    h1,h2,h3{font-weight:400;line-height:1.15;text-align:center}h1{font-size:clamp(42px,8vw,82px);margin:8px 0;color:#f6d5e3;text-shadow:0 0 28px #d43b817a}h2{font-size:clamp(30px,5vw,50px);color:var(--rose);margin:12px 0}h3{font-size:22px;color:#f2d7df;margin:9px 0}.eyebrow{text-align:center;color:var(--gold);letter-spacing:.22em;text-transform:uppercase;font-size:11px}.lead{text-align:center;max-width:720px;margin:10px auto 20px;color:#eadce3}.hint{text-align:center;color:#bba6b2;font-size:14px}.media{position:relative;max-width:920px;margin:18px auto;border:1px solid var(--line);background:#030205;box-shadow:0 24px 70px #000c;overflow:hidden}.media.square{max-width:780px}.media img,.media video{display:block;width:100%;max-height:72vh;object-fit:contain;background:#030205}.opening-image{object-fit:cover!important;aspect-ratio:1/1}
+    .actions{text-align:center;margin:20px auto}.btn{display:inline-block;margin:7px;padding:12px 23px;border:1px solid var(--gold);background:#2a1224;color:#fff1e8;text-decoration:none;cursor:pointer;letter-spacing:.04em;transition:.2s}.btn:hover,.btn:focus-visible{background:#672844;box-shadow:0 0 22px #bd3f7466;outline:none}.btn:disabled,.btn.locked{opacity:.38;cursor:not-allowed;box-shadow:none}.secondary{background:transparent;border-color:#79596c}.teal{border-color:var(--teal);box-shadow:inset 0 0 0 1px #57d7dc22}.status-note{max-width:680px;margin:12px auto;padding:12px 16px;border:1px solid #58364c;background:#160d18;text-align:center;color:#d9c5cf}
+    .doors{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;max-width:900px;margin:24px auto}.door{padding:26px 20px;border:1px solid #6c455c;background:linear-gradient(145deg,#241126,#0d0a11);text-align:center;box-shadow:0 15px 40px #0008}.door.ready{border-color:#a47690}.door.locked{filter:grayscale(.85);opacity:.58}.sigil{width:74px;height:74px;margin:auto;border:1px solid var(--gold);border-radius:50%;display:grid;place-items:center;font-size:34px;color:var(--rose);box-shadow:0 0 22px #c7337970}.door p{min-height:54px;color:#cab5c1;font-size:15px}
+    .gift-grid,.archive-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:15px;margin:22px auto;max-width:980px}.gift{position:relative;border:1px solid #5f3d52;background:#160f19;padding:10px;text-align:center;overflow:hidden}.gift img{width:100%;aspect-ratio:1/1;object-fit:cover;background:#0b080d}.gift .btn{font-size:13px;padding:8px 12px;margin:8px 0 2px}.gift small{display:block;color:#b99faa;min-height:22px}.gift.unavailable{filter:grayscale(1);opacity:.55}.gift.vip{border-color:var(--gold)}.gift.claimed:after{content:"CLAIMED";position:absolute;top:17px;right:-36px;width:135px;transform:rotate(39deg);background:#176a61;color:#fff;font-size:10px;letter-spacing:.12em;padding:4px}.placeholder{aspect-ratio:1;display:grid;place-items:center;background:radial-gradient(circle,#471936,#100b13 68%);font-size:40px;color:#dcb7c8;letter-spacing:.12em}.gift.locked-gift img{filter:blur(5px) grayscale(.5);opacity:.45}.gift.locked-gift .btn{pointer-events:none;opacity:.35}
+    .game-board{position:relative;max-width:780px;margin:18px auto;border:1px solid #79556a;box-shadow:0 24px 70px #000c}.game-board img{display:block;width:100%}.hotspot{position:absolute;border:2px solid transparent;background:transparent;cursor:pointer;border-radius:45%;color:transparent}.hotspot:focus-visible{outline:3px solid #fff0bc}.hotspot:hover{border-color:#f7d89a55;background:#f7d89a12}.chair{left:20%;top:48%;width:38%;height:38%}.thread-tip{position:absolute;left:36%;top:73%;width:16px;height:16px;border-radius:50%;background:#f3db9a;box-shadow:0 0 0 6px #f3db9a33,0 0 24px #fff;animation:pulse 1.4s infinite;pointer-events:none;opacity:0}.show-hint .thread-tip{opacity:1}@keyframes pulse{50%{transform:scale(1.4);opacity:.55}}
+    .rabbit-board{max-width:470px}.part{border-radius:38%;transition:.18s}.part.correct{border-color:transparent;background:transparent;box-shadow:none;pointer-events:none}.part.wrong{border-color:#be3556;background:#be35563b}.part-head{left:48%;top:10%;width:38%;height:22%}.part-top{left:42%;top:31%;width:46%;height:28%}.part-pants{left:44%;top:59%;width:42%;height:17%}.part-shoes{left:45%;top:75%;width:42%;height:12%}
+    .stitch-meter{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:14px}.stitch{padding:7px 11px;border:1px solid #523747;color:#8d7883;font-size:12px}.stitch.done{border-color:var(--teal);color:#d9ffff;background:#123231}.divider{border:0;border-top:1px solid #4c3041;margin:38px 0}.archive h3{text-align:left;margin-top:25px}.archive-grid{grid-template-columns:repeat(auto-fit,minmax(135px,1fr))}.archive-grid .gift h3{font-size:16px;min-height:38px}.archive-grid .gift small{font-size:12px}.archive-grid .placeholder{font-size:27px}
+    .notice{max-width:770px;margin:20px auto;border:1px solid var(--gold);background:#1c1220;padding:17px;text-align:center}.hidden{display:none!important}footer{text-align:center;color:#8f7582;font-size:12px;letter-spacing:.1em;padding:20px}
+    @media(max-width:650px){.doors{grid-template-columns:1fr}.gift-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.archive-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.gift{padding:7px}.topbar{font-size:10px}.btn{padding:11px 16px}.door p{min-height:0}}
+    @media(prefers-reduced-motion:reduce){*{animation:none!important;scroll-behavior:auto!important;transition:none!important}}
+  </style>
+</head>
+<body>
+  <nav class="topbar"><a href="../index.html">← Chapter Index</a><span class="progress" id="progress">The Grounds</span></nav>
+  <main>
+    <section class="scene active" id="opening">
+      <div class="eyebrow">The House of Restraints · Chapter III</div>
+      <h1>The House Starts Lying</h1>
+      <p class="lead">The hallway gave you choices. The grounds give you none.</p>
+      <div class="media square"><img class="opening-image" src="assets/thumbs/opening.webp" alt="The illuminated carousel grounds of the House of Restraints"></div>
+      <p class="hint">The music is playing again. No one is turning the handle.</p>
+      <div class="actions"><button class="btn" data-go="hub" data-event="chapter_three_entered">Enter the Carousel Grounds →</button></div>
+    </section>
+
+    <section class="scene" id="hub">
+      <div class="eyebrow">The Thirteenth Turn</div>
+      <h2>Choose Who the House Shows You</h2>
+      <p class="lead">The grin comes first. The Rabbit will not appear until she is finished with you.</p>
+      <div class="doors">
+        <article class="door ready"><div class="sigil">⌁</div><h3>The Cheshire Cat</h3><p>She has been watching from the dark between the lights.</p><button class="btn teal" data-go="cheshire-intro" data-event="cheshire_path_started">Follow the Grin →</button></article>
+        <article class="door locked" id="rabbit-door"><div class="sigil">♢</div><h3>The White Rabbit</h3><p id="rabbit-door-copy">Something in the nursery is pulling at its own seams.</p><button class="btn" id="rabbit-door-button" data-go="rabbit-intro" data-event="rabbit_path_started" disabled>Locked by the Cheshire</button></article>
+      </div>
+      <div class="actions"><button class="btn secondary" data-go="collection">View the Gift Record</button></div>
+    </section>
+
+    <section class="scene" id="cheshire-intro">
+      <div class="eyebrow">The Jester Presents</div><h2>The Cheshire Cat</h2>
+      <div class="media square"><video id="cheshire-intro-video" playsinline preload="none"></video></div>
+      <p class="hint" id="load-cheshire-intro-video">Preparing the Jester’s film…</p>
+      <p class="hint">Listen to the Jester. The path opens when her warning is complete.</p>
+      <div class="actions"><button class="btn" id="to-cheshire" data-go="cheshire-film" disabled>Enter Her Story →</button></div>
+    </section>
+
+    <section class="scene" id="cheshire-film">
+      <div class="eyebrow">Character File · Cheshire</div><h2>Watch the Grin</h2>
+      <p class="lead">Stay until the very end. She does not leave gifts for people who look away.</p>
+      <div class="media"><video id="cheshire-video" playsinline preload="none"></video></div>
+      <p class="hint" id="load-cheshire-video">Preparing the Cheshire film…</p>
+      <div class="status-note" id="cheshire-status">Five gifts remain hidden until the film ends.</div>
+      <div class="actions"><button class="btn" id="to-cheshire-gifts" data-go="cheshire-gifts" disabled>Receive What She Left Behind →</button></div>
+    </section>
+
+    <section class="scene" id="cheshire-gifts">
+      <div class="eyebrow">She Showed You Everything</div><h2>Take What She Left Behind</h2>
+      <p class="lead">Five pieces. Five eyes still watching.</p>
+      <div class="gift-grid" id="cheshire-gift-grid"></div>
+      <div class="actions"><button class="btn" data-go="hub" data-event="cheshire_section_completed">Return to the Carousel →</button></div>
+    </section>
+
+    <section class="scene" id="rabbit-intro">
+      <div class="eyebrow">The Jester Presents</div><h2>The White Rabbit</h2>
+      <p class="lead">Alice asked whether you had seen him. The House finally answers.</p>
+      <div class="media square"><video id="rabbit-intro-video" playsinline preload="none"></video></div>
+      <p class="hint" id="load-rabbit-intro-video">Preparing the Jester’s film…</p>
+      <div class="actions"><button class="btn" id="to-rabbit" data-go="rabbit-film" disabled>Enter the Nursery →</button></div>
+    </section>
+
+    <section class="scene" id="rabbit-film">
+      <div class="eyebrow">Character File · The White Rabbit</div><h2>Do Not Pull the Thread</h2>
+      <p class="lead">Watch closely. The thing that catches him is the only thing that can put him back together.</p>
+      <div class="media square"><video id="rabbit-video" playsinline preload="none"></video></div>
+      <p class="hint" id="load-rabbit-video">Preparing the nursery film…</p>
+      <div class="status-note" id="rabbit-status">The nursery will open when the film ends.</div>
+      <div class="actions"><button class="btn" id="to-rabbit-game" data-go="rabbit-room" disabled>Follow the Loose Thread →</button></div>
+    </section>
+
+    <section class="scene" id="rabbit-room">
+      <div class="eyebrow">The Nursery</div><h2>Find Where the Thread Caught</h2>
+      <p class="lead">It is somewhere in the room. Pull the wrong thing and he may come apart completely.</p>
+      <div class="game-board" id="room-board">
+        <img src="assets/thumbs/rabbit-room.webp" alt="The White Rabbit standing inside the nursery near a rocking chair">
+        <button class="hotspot chair" id="chair-hotspot" aria-label="Inspect the rocking chair"></button><span class="thread-tip"></span>
+      </div>
+      <p class="hint" id="room-hint">Search the nursery image.</p>
+    </section>
+
+    <section class="scene" id="rabbit-repair">
+      <div class="eyebrow">The Thread Is Yours</div><h2>Stitch Him Back Together</h2>
+      <p class="lead">Begin at his head and work downward. The order matters.</p>
+      <div class="stitch-meter"><span class="stitch" data-stitch="head">Head</span><span class="stitch" data-stitch="top">Top</span><span class="stitch" data-stitch="pants">Pants</span><span class="stitch" data-stitch="shoes">Shoes</span></div>
+      <div class="game-board rabbit-board" id="rabbit-board">
+        <img src="assets/thumbs/rabbit-game.webp" alt="The White Rabbit waiting to be repaired">
+        <button class="hotspot part part-head" data-part="head" aria-label="Repair the Rabbit's head"></button>
+        <button class="hotspot part part-top" data-part="top" aria-label="Repair the Rabbit's top"></button>
+        <button class="hotspot part part-pants" data-part="pants" aria-label="Repair the Rabbit's pants"></button>
+        <button class="hotspot part part-shoes" data-part="shoes" aria-label="Repair the Rabbit's shoes"></button>
+      </div>
+      <p class="status-note" id="repair-message">The first loose seam is at his head.</p>
+      <div class="gift-grid" id="rabbit-progress-gifts"></div>
+      <div class="actions"><button class="btn hidden" id="finish-rabbit" data-go="finale">Finish the Last Stitch →</button></div>
+    </section>
+
+    <section class="scene" id="finale">
+      <div class="eyebrow">The House Remembers</div><h2>You Put Him Back Together.</h2>
+      <p class="lead">That does not mean you fixed him.</p>
+      <div class="gift-grid" id="rabbit-gift-grid"></div>
+      <div class="notice">The carousel begins another turn. Somewhere behind you, the Jester starts laughing.</div>
+      <div class="actions"><button class="btn" data-go="collection" data-event="chapter_three_completed">Open Your Collection Record →</button></div>
+    </section>
+
+    <section class="scene archive" id="collection">
+      <div class="eyebrow">Your House of Restraints Record</div><h2>The Gifts the House Has Shown</h2>
+      <p class="lead">Current claims are remembered in this browser. Earlier gifts remain listed so completionists can see what exists.</p>
+      <h3>Chapter III · Current Gifts</h3><div class="gift-grid" id="current-record"></div>
+      <hr class="divider"><h3>Previously Released</h3><div class="archive-grid" id="previous-record"></div>
+      <hr class="divider"><h3>Not Yet Available</h3><p class="hint">These Alice pieces will be repaired and added in a later interaction.</p><div class="archive-grid" id="future-record"></div>
+      <hr class="divider"><h3>VIP Event Exclusive</h3><div class="archive-grid" id="vip-record"></div>
+      <div class="actions"><button class="btn" data-go="hub">Return to the Carousel</button><a class="btn secondary" href="../index.html">Return to Chapter Index</a></div>
+    </section>
+  </main>
+  <footer>HOUSE OF RESTRAINTS · CHAPTER III · THE HOUSE STARTS LYING</footer>
+
+  <script data-goatcounter="https://xxxtigger.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+  <script>
+    const $=id=>document.getElementById(id);
+    const KEY='hor-chapter-three-v1';
+    const blank=()=>({cheshire:false,rabbitFilm:false,rabbitParts:[],claims:[],events:[]});
+    function load(){try{return Object.assign(blank(),JSON.parse(localStorage.getItem(KEY))||{})}catch(e){return blank()}}
+    let state=load(),current='opening';
+    const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}};
+    const LABELS={opening:'The Grounds',hub:'The Carousel', 'cheshire-intro':'The Jester','cheshire-film':'The Cheshire Cat','cheshire-gifts':'Cheshire Gifts','rabbit-intro':'The Jester','rabbit-film':'The Nursery Door','rabbit-room':'The Nursery','rabbit-repair':'The Loose Thread',finale:'The Last Stitch',collection:'Gift Record'};
+    function trackOnce(name,title=name){if(state.events.includes(name))return;if(!(window.goatcounter&&typeof window.goatcounter.count==='function')){setTimeout(()=>trackOnce(name,title),600);return}window.goatcounter.count({path:name,title,event:true});state.events.push(name);save()}
+    function go(id){const next=$(id);if(!next)return;document.querySelectorAll('.scene').forEach(s=>s.classList.toggle('active',s===next));current=id;$('progress').textContent=LABELS[id]||'Chapter III';document.querySelectorAll('video').forEach(v=>{if(!v.closest('.active'))v.pause()});if(VIDEO_SCENES[id])hydrateVideo(...VIDEO_SCENES[id]);if(id==='hub')syncHub();if(id==='collection')renderRecords();window.scrollTo({top:0,behavior:'smooth'})}
+    document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>{if(b.disabled)return;if(b.dataset.event)trackOnce(b.dataset.event);go(b.dataset.go)}));
+    function unlockOnEnd(videoId,buttonId,eventName,callback){const video=$(videoId),button=$(buttonId);video.addEventListener('ended',()=>{button.disabled=false;trackOnce(eventName);callback?.()})}
+    unlockOnEnd('cheshire-intro-video','to-cheshire','cheshire_introduction_completed');
+    unlockOnEnd('cheshire-video','to-cheshire-gifts','cheshire_video_completed',()=>{state.cheshire=true;save();$('cheshire-status').textContent='The grin is gone. Five gifts remain.';syncHub();renderGiftGrid('cheshire-gift-grid',CHESHIRE,true)});
+    unlockOnEnd('rabbit-intro-video','to-rabbit','rabbit_introduction_completed');
+    unlockOnEnd('rabbit-video','to-rabbit-game','rabbit_video_completed',()=>{state.rabbitFilm=true;save();$('rabbit-status').textContent='The nursery door has opened.'});
+
+    const VIDEO_FILES={
+      cheshire:{prefix:'assets/chunks/cheshire/',count:44},
+      'introduce-cheshire':{prefix:'assets/chunks/introduce-cheshire/',count:16},
+      'introduce-rabbit':{prefix:'assets/chunks/introduce-rabbit/',count:22},
+      rabbit:{prefix:'assets/chunks/rabbit/',count:28}
+    };
+    const VIDEO_SCENES={'cheshire-intro':['cheshire-intro-video','introduce-cheshire'],'cheshire-film':['cheshire-video','cheshire'],'rabbit-intro':['rabbit-intro-video','introduce-rabbit'],'rabbit-film':['rabbit-video','rabbit']};
+    const chunkName=i=>`${String(i).padStart(3,'0')}.part`;
+    async function assemble(prefix,count,type){const responses=await Promise.all(Array.from({length:count},(_,i)=>fetch(prefix+chunkName(i))));if(responses.some(r=>!r.ok))throw new Error('A file piece could not be loaded.');return new Blob(await Promise.all(responses.map(r=>r.arrayBuffer())),{type})}
+    async function hydrateVideo(id,key){const video=$(id);if(video.dataset.ready||video.dataset.loading)return;video.dataset.loading='1';const note=$(`load-${id}`);try{const spec=VIDEO_FILES[key],blob=await assemble(spec.prefix,spec.count,'video/mp4');video.src=URL.createObjectURL(blob);video.controls=true;video.dataset.ready='1';video.load();note.textContent='Film ready. Press play.'}catch(e){note.textContent='The film did not load. Refresh this page and try again.'}finally{delete video.dataset.loading}}
+    async function downloadGift(g,button){button.disabled=true;button.textContent='Preparing…';try{const blob=await assemble(`downloads/chunks/${g.id}/`,g.parts,'application/octet-stream'),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=g.download;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),30000);if(!state.claims.includes(g.id)){state.claims.push(g.id);save()}trackOnce(`gift_claim_${g.id}`,`${g.name} claimed`);button.closest('.gift').classList.add('claimed');button.textContent='Claim Again ↓'}catch(e){button.textContent='Try Again'}finally{button.disabled=false}}
+    const CHESHIRE=[
+      {id:'cheshire-boa',name:'Cheshire Cat · Boa',img:'cheshire-boa.webp',parts:3,download:'[PT] Simblreen 2026_Cheshire Cat_Boa.package'},
+      {id:'cheshire-boots',name:'Cheshire Cat · Boots',img:'cheshire-boots.webp',parts:7,download:'[PT] Simblreen 2026_Cheshire Cat_Boots.package'},
+      {id:'cheshire-dress',name:'Cheshire Cat · Dress',img:'cheshire-dress.webp',parts:7,download:'[PT] Simblreen 2026_Cheshire Cat_Dress.package'},
+      {id:'cheshire-ears',name:'Cheshire Cat · Ears',img:'cheshire-ears.webp',parts:5,download:'[PT] Simblreen 2026_Cheshire Cat_Ears.package'},
+      {id:'cheshire-tail',name:'Cheshire Cat · Tail',img:'cheshire-tail.webp',parts:8,download:'[PT] Simblreen 2026_Cheshire Cat_Tail.package'}
+    ];
+    const RABBIT=[
+      {id:'rabbit-head',part:'head',name:'White Rabbit · Head',img:'rabbit-head.webp',parts:6,download:'[PT] Simblreen 2026_White Rabbit_Head.package'},
+      {id:'rabbit-top',part:'top',name:'White Rabbit · Top',img:'rabbit-top.webp',parts:7,download:'[PT] Simblreen 2026_White Rabbit_Top.package'},
+      {id:'rabbit-pants',part:'pants',name:'White Rabbit · Pants',img:'rabbit-pants.webp',parts:6,download:'[PT] Simblreen 2026_White Rabbit_Pants.package'},
+      {id:'rabbit-shoes',part:'shoes',name:'White Rabbit · Shoes',img:'rabbit-shoes.webp',parts:6,download:'[PT] Simblreen 2026_White Rabbit_Shoes.package'}
+    ];
+    function giftCard(g,unlocked=true,note='Ready to claim'){
+      const article=document.createElement('article');article.className='gift'+(unlocked?'':' locked-gift')+(state.claims.includes(g.id)?' claimed':'');
+      article.innerHTML=`<img src="assets/thumbs/${g.img}" alt="Preview of ${g.name}"><h3>${g.name}</h3><small>${unlocked?note:'Still hidden'}</small>`;
+      if(unlocked){const button=document.createElement('button');button.className='btn secondary';button.textContent=state.claims.includes(g.id)?'Claim Again ↓':'Claim Gift ↓';button.addEventListener('click',()=>downloadGift(g,button));article.append(button)}
+      return article;
+    }
+    function renderGiftGrid(id,items,unlocked){const area=$(id);if(!area)return;area.replaceChildren(...items.map(g=>giftCard(g,unlocked)))}
+    function syncHub(){const open=state.cheshire;$('rabbit-door').classList.toggle('locked',!open);$('rabbit-door').classList.toggle('ready',open);$('rabbit-door-button').disabled=!open;$('rabbit-door-button').textContent=open?'Follow the Thread →':'Locked by the Cheshire';if(open){$('to-cheshire-gifts').disabled=false;$('cheshire-status').textContent='The grin is gone. Five gifts remain.'}if(state.rabbitFilm){$('to-rabbit-game').disabled=false;$('rabbit-status').textContent='The nursery door has opened.'}}
+    renderGiftGrid('cheshire-gift-grid',CHESHIRE,state.cheshire);renderGiftGrid('rabbit-gift-grid',RABBIT,state.rabbitParts.length===4);
+
+    setTimeout(()=>$('room-board').classList.add('show-hint'),9000);
+    $('chair-hotspot').addEventListener('click',()=>{trackOnce('rabbit_thread_found','Loose thread found at the rocking chair');$('room-hint').textContent='The thread tightens around your finger.';setTimeout(()=>go('rabbit-repair'),650)});
+    const order=['head','top','pants','shoes'];
+    function syncRepair(){document.querySelectorAll('[data-stitch]').forEach(s=>s.classList.toggle('done',state.rabbitParts.includes(s.dataset.stitch)));const unlocked=RABBIT.filter(g=>state.rabbitParts.includes(g.part));$('rabbit-progress-gifts').replaceChildren(...unlocked.map(g=>giftCard(g,true,'Stitch repaired')));document.querySelectorAll('.part').forEach(p=>p.classList.toggle('correct',state.rabbitParts.includes(p.dataset.part)));if(state.rabbitParts.length===4){$('repair-message').textContent='Every seam is closed. He is still watching.';$('finish-rabbit').classList.remove('hidden');trackOnce('rabbit_game_completed','White Rabbit repair game completed')}else $('repair-message').textContent=`Next loose seam: ${order[state.rabbitParts.length]}.`}
+    document.querySelectorAll('.part').forEach(p=>p.addEventListener('click',()=>{const wanted=order[state.rabbitParts.length];if(p.dataset.part!==wanted){p.classList.add('wrong');$('repair-message').textContent='The thread snaps back. Start at the next loose seam.';setTimeout(()=>p.classList.remove('wrong'),450);return}state.rabbitParts.push(wanted);save();trackOnce(`rabbit_piece_${wanted}_unlocked`,`Rabbit ${wanted} unlocked`);syncRepair()}));syncRepair();
+
+    const PREVIOUS=[
+      ['Popcorn Girl · Bra','popcorn-bra.webp'],['Popcorn Girl · Shorts','popcorn-shorts.webp'],['Popcorn Girl · Hat','popcorn-hat.webp'],['Receptionist · Hat','reception-hat.webp'],['Receptionist · Blindfold','reception-blindfold.webp'],['Carrie · Blood Face Detail','carrie-blood.webp'],['Carrie · Crown','carrie-crown.webp'],['Carrie · Dress','carrie-dress.webp'],['Carrie · Sash','carrie-sash.webp'],['13 · Heels',null],['13 · Head',null],['13 · Top',null],['13 · Bottoms',null],['Ticketmaster · Face Scarf','ticketmaster-scarf.webp'],['Ticketmaster · Hat','ticketmaster-hat.webp'],['Ticketmaster · Hole Punch','ticketmaster-punch.webp'],['Alice · Stockings','alice-stockings.webp'],['Alice · Bow','alice-bow.webp'],['Alice · Face-paint Tears',null]
+    ];
+    const FUTURE=[['Alice · Skirt','alice-skirt.webp'],['Alice · Top','alice-top.webp'],['Alice · Shoes','alice-shoes.webp']];
+    function recordCard(name,img,status,cls=''){const a=document.createElement('article');a.className=`gift ${cls}`;a.innerHTML=img?`<img src="assets/thumbs/${img}" alt="Preview of ${name}">`:`<div class="placeholder" aria-label="Thumbnail not available">13</div>`;a.innerHTML+=`<h3>${name}</h3><small>${status}</small>`;return a}
+    function renderRecords(){const unlockedNow=[...CHESHIRE.filter(()=>state.cheshire),...RABBIT.filter(g=>state.rabbitParts.includes(g.part))];$('current-record').replaceChildren(...unlockedNow.map(g=>giftCard(g,true,state.claims.includes(g.id)?'Claimed in this browser':'Unlocked')),...[...CHESHIRE,...RABBIT].filter(g=>!unlockedNow.includes(g)).map(g=>giftCard(g,false)));$('previous-record').replaceChildren(...PREVIOUS.map(x=>recordCard(x[0],x[1],'Previously released')));$('future-record').replaceChildren(...FUTURE.map(x=>recordCard(x[0],x[1],'Not yet available','unavailable')));$('vip-record').replaceChildren(recordCard('Carousel Boots','carousel-boots.webp','Complete the VIP Event to receive this gift.','vip'))}
+    if(state.cheshire){$('to-cheshire-gifts').disabled=false;$('rabbit-door-button').disabled=false}if(state.rabbitFilm)$('to-rabbit-game').disabled=false;syncHub();
+  </script>
+</body>
+</html>
