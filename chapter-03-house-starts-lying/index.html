@@ -126,7 +126,7 @@
       <h3>Chapter III · Current Gifts</h3><div class="gift-grid" id="current-record"></div>
       <hr class="divider"><h3>Previously Released</h3><div class="archive-grid" id="previous-record"></div>
       <hr class="divider"><h3>Not Yet Available</h3><p class="hint">These Alice pieces will be repaired and added in a later interaction.</p><div class="archive-grid" id="future-record"></div>
-      <hr class="divider"><h3>VIP Event Exclusive</h3><div class="archive-grid" id="vip-record"></div>
+      <hr class="divider"><h3>VIP Event Exclusive</h3><p class="hint" id="vip-invite-note">VIP participants receive a private redemption link after submitting their creation.</p><div class="archive-grid" id="vip-record"></div>
       <div class="actions"><button class="btn" data-go="hub">Return to the Carousel</button><a class="btn secondary" href="../index.html">Return to Chapter Index</a></div>
     </section>
   </main>
@@ -136,9 +136,13 @@
   <script>
     const $=id=>document.getElementById(id);
     const KEY='hor-chapter-three-v1';
-    const blank=()=>({cheshire:false,rabbitFilm:false,rabbitParts:[],claims:[],events:[]});
+    const blank=()=>({cheshire:false,rabbitFilm:false,rabbitParts:[],claims:[],events:[],vipClaimed:false});
     function load(){try{return Object.assign(blank(),JSON.parse(localStorage.getItem(KEY))||{})}catch(e){return blank()}}
     let state=load(),current='opening';
+    // Each VIP invitation is a long random token; only its SHA-256 digest is published here.
+    // This is a personal browser record, not server-side identity or single-use validation.
+    const VIP_INVITE_HASHES=new Set(['edc627f728a9a50e69acf31fb1eb0a1ce422dc1a6571a5be0a5954d784a90f8b']);
+    let vipInviteValid=false,vipInviteInvalid=false;
     const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}};
     const LABELS={opening:'The Grounds',hub:'The Carousel', 'cheshire-intro':'The Jester','cheshire-film':'The Cheshire Cat','cheshire-gifts':'Cheshire Gifts','rabbit-intro':'The Jester','rabbit-film':'The Nursery Door','rabbit-room':'The Nursery','rabbit-repair':'The Loose Thread',finale:'The Last Stitch',collection:'Gift Record'};
     function trackOnce(name,title=name){if(state.events.includes(name))return;if(!(window.goatcounter&&typeof window.goatcounter.count==='function')){setTimeout(()=>trackOnce(name,title),600);return}window.goatcounter.count({path:name,title,event:true});state.events.push(name);save()}
@@ -195,8 +199,47 @@
     ];
     const FUTURE=[['Alice · Skirt','alice-skirt.webp'],['Alice · Top','alice-top.webp'],['Alice · Shoes','alice-shoes.webp']];
     function recordCard(name,img,status,cls=''){const a=document.createElement('article');a.className=`gift ${cls}`;a.innerHTML=img?`<img src="assets/thumbs/${img}" alt="Preview of ${name}">`:`<div class="placeholder" aria-label="Thumbnail not available">13</div>`;a.innerHTML+=`<h3>${name}</h3><small>${status}</small>`;return a}
-    function renderRecords(){const unlockedNow=[...CHESHIRE.filter(()=>state.cheshire),...RABBIT.filter(g=>state.rabbitParts.includes(g.part))];$('current-record').replaceChildren(...unlockedNow.map(g=>giftCard(g,true,state.claims.includes(g.id)?'Claimed in this browser':'Unlocked')),...[...CHESHIRE,...RABBIT].filter(g=>!unlockedNow.includes(g)).map(g=>giftCard(g,false)));$('previous-record').replaceChildren(...PREVIOUS.map(x=>recordCard(x[0],x[1],'Previously released')));$('future-record').replaceChildren(...FUTURE.map(x=>recordCard(x[0],x[1],'Not yet available','unavailable')));$('vip-record').replaceChildren(recordCard('Carousel Boots','carousel-boots.webp','Complete the VIP Event to receive this gift.','vip'))}
-    if(state.cheshire){$('to-cheshire-gifts').disabled=false;$('rabbit-door-button').disabled=false}if(state.rabbitFilm)$('to-rabbit-game').disabled=false;syncHub();
+    function renderRecords(){
+      const unlockedNow=[...CHESHIRE.filter(()=>state.cheshire),...RABBIT.filter(g=>state.rabbitParts.includes(g.part))];
+      $('current-record').replaceChildren(...unlockedNow.map(g=>giftCard(g,true,state.claims.includes(g.id)?'Claimed in this browser':'Unlocked')),...[...CHESHIRE,...RABBIT].filter(g=>!unlockedNow.includes(g)).map(g=>giftCard(g,false)));
+      $('previous-record').replaceChildren(...PREVIOUS.map(x=>recordCard(x[0],x[1],'Previously released')));
+      $('future-record').replaceChildren(...FUTURE.map(x=>recordCard(x[0],x[1],'Not yet available','unavailable')));
+      const status=state.vipClaimed?'Claimed in this browser':vipInviteValid?'VIP reward verified · awaiting your confirmation':'Complete the VIP Event to receive this gift.';
+      const vipCard=recordCard('Carousel Boots','carousel-boots.webp',status,'vip'+(state.vipClaimed?' claimed':''));
+      if(vipInviteValid&&!state.vipClaimed){
+        const button=document.createElement('button');
+        button.className='btn secondary';
+        button.textContent='I Received My Boots · Mark Claimed';
+        button.addEventListener('click',()=>{
+          state.vipClaimed=true;
+          save();
+          trackOnce('vip_carousel_boots_claimed','VIP Carousel Boots claimed');
+          renderRecords();
+        });
+        vipCard.append(button);
+      }
+      $('vip-record').replaceChildren(vipCard);
+      $('vip-invite-note').textContent=state.vipClaimed
+        ?'Your VIP Carousel Boots are marked CLAIMED in this browser. The House remembers.'
+        :vipInviteValid
+          ?'Your private VIP invitation is verified! Once you have received your Carousel Boots from PastelTigger, confirm using the button below.'
+          :vipInviteInvalid
+            ?'This VIP invitation could not be verified. Please ask PastelTigger for a fresh redemption link.'
+            :'VIP participants receive a private redemption link after submitting their creation.';
+    }
+    async function openVipInvitation(){
+      const token=new URLSearchParams(window.location.hash.slice(1)).get('vip');
+      if(!token)return;
+      try{
+        if(!/^[A-Za-z0-9_-]{16,128}$/.test(token))throw new Error('Invalid invitation format');
+        const digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(token));
+        const hash=Array.from(new Uint8Array(digest),byte=>byte.toString(16).padStart(2,'0')).join('');
+        if(!VIP_INVITE_HASHES.has(hash))throw new Error('Unrecognized invitation');
+        vipInviteValid=true;
+      }catch(e){vipInviteInvalid=true}
+      go('collection');
+    }
+    if(state.cheshire){$('to-cheshire-gifts').disabled=false;$('rabbit-door-button').disabled=false}if(state.rabbitFilm)$('to-rabbit-game').disabled=false;syncHub();openVipInvitation();
   </script>
 </body>
 </html>
