@@ -136,13 +136,16 @@
   <script>
     const $=id=>document.getElementById(id);
     const KEY='hor-chapter-three-v1';
-    const blank=()=>({cheshire:false,rabbitFilm:false,rabbitParts:[],claims:[],events:[],vipClaimed:false});
+    const blank=()=>({cheshire:false,rabbitFilm:false,rabbitParts:[],claims:[],events:[],vipClaimed:false,vipToken:''});
     function load(){try{return Object.assign(blank(),JSON.parse(localStorage.getItem(KEY))||{})}catch(e){return blank()}}
     let state=load(),current='opening';
     // Each VIP invitation is a long random token; only its SHA-256 digest is published here.
     // This is a personal browser record, not server-side identity or single-use validation.
-    const VIP_INVITE_HASHES=new Set(['edc627f728a9a50e69acf31fb1eb0a1ce422dc1a6571a5be0a5954d784a90f8b']);
-    let vipInviteValid=false,vipInviteInvalid=false;
+    const VIP_INVITE_HASHES=new Set(['edc627f728a9a50e69acf31fb1eb0a1ce422dc1a6571a5be0a5954d784a90f8b','b6317083dd6d9e694442c348a97badd8067f07f84046b4702cc73c564f367a84']);
+    const VIP_DOWNLOAD_HASHES=new Set(['b6317083dd6d9e694442c348a97badd8067f07f84046b4702cc73c564f367a84']);
+    const VIP_BOOT_PACKAGE={prefix:'downloads/chunks/vip-carousel-boots-secure/',count:8,salt:'f74e97cc2e27b96941aa517e5f16a152',iv:'ea7fc8814c365b4fe872efa0',iterations:210000};
+    const hexBytes=hex=>new Uint8Array(hex.match(/../g).map(byte=>parseInt(byte,16)));
+    let vipInviteValid=false,vipInviteInvalid=false,vipDownloadReady=false;
     const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}};
     const LABELS={opening:'The Grounds',hub:'The Carousel', 'cheshire-intro':'The Jester','cheshire-film':'The Cheshire Cat','cheshire-gifts':'Cheshire Gifts','rabbit-intro':'The Jester','rabbit-film':'The Nursery Door','rabbit-room':'The Nursery','rabbit-repair':'The Loose Thread',finale:'The Last Stitch',collection:'Gift Record'};
     function trackOnce(name,title=name){if(state.events.includes(name))return;if(!(window.goatcounter&&typeof window.goatcounter.count==='function')){setTimeout(()=>trackOnce(name,title),600);return}window.goatcounter.count({path:name,title,event:true});state.events.push(name);save()}
@@ -204,9 +207,10 @@
       $('current-record').replaceChildren(...unlockedNow.map(g=>giftCard(g,true,state.claims.includes(g.id)?'Claimed in this browser':'Unlocked')),...[...CHESHIRE,...RABBIT].filter(g=>!unlockedNow.includes(g)).map(g=>giftCard(g,false)));
       $('previous-record').replaceChildren(...PREVIOUS.map(x=>recordCard(x[0],x[1],'Previously released')));
       $('future-record').replaceChildren(...FUTURE.map(x=>recordCard(x[0],x[1],'Not yet available','unavailable')));
-      const status=state.vipClaimed?'Claimed in this browser':vipInviteValid?'VIP invitation verified · ready to claim':'Complete the VIP Event to receive this gift.';
+      const canDownload=vipDownloadReady||Boolean(state.vipToken);
+      const status=state.vipClaimed?'Claimed in this browser':canDownload?'VIP invitation verified · ready to claim':vipInviteValid?'VIP invitation verified · confirmation available':'Complete the VIP Event to receive this gift.';
       const vipCard=recordCard('Carousel Boots','carousel-boots.webp',status,'vip'+(state.vipClaimed?' claimed':''));
-      if(vipInviteValid||state.vipClaimed){
+      if(canDownload){
         const button=document.createElement('button');
         button.className='btn secondary';
         button.textContent=state.vipClaimed?'Download Again ↓':'Download Your Carousel Boots ↓';
@@ -228,23 +232,36 @@
       $('vip-record').replaceChildren(vipCard);
       $('vip-invite-note').textContent=state.vipClaimed
         ?'Your VIP Carousel Boots are marked CLAIMED in this browser. The House remembers.'
-        :vipInviteValid
+        :vipDownloadReady||state.vipToken
           ?'Your private VIP invitation is verified! Download your Carousel Boots below, or confirm if PastelTigger already sent them to you.'
+          :vipInviteValid
+            ?'Your VIP invitation is verified. If PastelTigger already sent the boots to you, mark them claimed below.'
           :vipInviteInvalid
             ?'This VIP invitation could not be verified. Please ask PastelTigger for a fresh redemption link.'
             :'VIP participants receive a private redemption link after submitting their creation.';
     }
     async function downloadVipBoots(button){
-      if(!vipInviteValid&&!state.vipClaimed)return;
+      const token=state.vipToken;
+      if(!token)return;
       button.disabled=true;
       const original=button.textContent;
       button.textContent='Preparing Your Boots…';
       try{
-        const response=await fetch('downloads/vip-carousel-boots.package',{cache:'no-store'});
-        if(!response.ok)throw new Error('VIP package is not available yet');
-        const blob=await response.blob();
-        const signature=new TextDecoder('ascii').decode(await blob.slice(0,4).arrayBuffer());
+        const encryptedBlob=await assemble(VIP_BOOT_PACKAGE.prefix,VIP_BOOT_PACKAGE.count,'application/octet-stream');
+        const encrypted=new Uint8Array(await encryptedBlob.arrayBuffer());
+        const keyMaterial=await crypto.subtle.importKey('raw',new TextEncoder().encode(token),'PBKDF2',false,['deriveKey']);
+        const key=await crypto.subtle.deriveKey(
+          {name:'PBKDF2',salt:hexBytes(VIP_BOOT_PACKAGE.salt),iterations:VIP_BOOT_PACKAGE.iterations,hash:'SHA-256'},
+          keyMaterial,
+          {name:'AES-GCM',length:256},
+          false,
+          ['decrypt']
+        );
+        const decrypted=await crypto.subtle.decrypt({name:'AES-GCM',iv:hexBytes(VIP_BOOT_PACKAGE.iv)},key,encrypted);
+        const packageBytes=new Uint8Array(decrypted);
+        const signature=new TextDecoder('ascii').decode(packageBytes.slice(0,4));
         if(signature!=='DBPF')throw new Error('VIP package could not be verified');
+        const blob=new Blob([packageBytes],{type:'application/octet-stream'});
         const url=URL.createObjectURL(blob);
         const link=document.createElement('a');
         link.href=url;
@@ -260,16 +277,17 @@
         }
         renderRecords();
       }catch(error){
-        button.textContent='Not Ready · Try Again Later';
+        button.textContent='Try Download Again';
         const note=$('vip-invite-note');
-        note.textContent='The Carousel Boots download is not available here yet. If you already received the OneDrive gift, use the confirmation button instead.';
+        note.textContent='The private download did not finish. Refresh this VIP link and try once more.';
         setTimeout(()=>{button.textContent=original;button.disabled=false},3500);
         return;
       }
       button.disabled=false;
     }
     async function openVipInvitation(){
-      const token=new URLSearchParams(window.location.hash.slice(1)).get('vip');
+      const linkToken=new URLSearchParams(window.location.hash.slice(1)).get('vip');
+      const token=linkToken||state.vipToken;
       if(!token)return;
       try{
         if(!/^[A-Za-z0-9_-]{16,128}$/.test(token))throw new Error('Invalid invitation format');
@@ -277,8 +295,16 @@
         const hash=Array.from(new Uint8Array(digest),byte=>byte.toString(16).padStart(2,'0')).join('');
         if(!VIP_INVITE_HASHES.has(hash))throw new Error('Unrecognized invitation');
         vipInviteValid=true;
-      }catch(e){vipInviteInvalid=true}
-      go('collection');
+        if(VIP_DOWNLOAD_HASHES.has(hash)){
+          vipDownloadReady=true;
+          state.vipToken=token;
+          save();
+        }
+      }catch(e){
+        vipInviteInvalid=true;
+        if(!linkToken){state.vipToken='';save()}
+      }
+      if(linkToken)go('collection');
     }
     if(state.cheshire){$('to-cheshire-gifts').disabled=false;$('rabbit-door-button').disabled=false}if(state.rabbitFilm)$('to-rabbit-game').disabled=false;syncHub();openVipInvitation();
   </script>
