@@ -204,28 +204,69 @@
       $('current-record').replaceChildren(...unlockedNow.map(g=>giftCard(g,true,state.claims.includes(g.id)?'Claimed in this browser':'Unlocked')),...[...CHESHIRE,...RABBIT].filter(g=>!unlockedNow.includes(g)).map(g=>giftCard(g,false)));
       $('previous-record').replaceChildren(...PREVIOUS.map(x=>recordCard(x[0],x[1],'Previously released')));
       $('future-record').replaceChildren(...FUTURE.map(x=>recordCard(x[0],x[1],'Not yet available','unavailable')));
-      const status=state.vipClaimed?'Claimed in this browser':vipInviteValid?'VIP reward verified · awaiting your confirmation':'Complete the VIP Event to receive this gift.';
+      const status=state.vipClaimed?'Claimed in this browser':vipInviteValid?'VIP invitation verified · ready to claim':'Complete the VIP Event to receive this gift.';
       const vipCard=recordCard('Carousel Boots','carousel-boots.webp',status,'vip'+(state.vipClaimed?' claimed':''));
-      if(vipInviteValid&&!state.vipClaimed){
+      if(vipInviteValid||state.vipClaimed){
         const button=document.createElement('button');
         button.className='btn secondary';
-        button.textContent='I Received My Boots · Mark Claimed';
-        button.addEventListener('click',()=>{
+        button.textContent=state.vipClaimed?'Download Again ↓':'Download Your Carousel Boots ↓';
+        button.addEventListener('click',()=>downloadVipBoots(button));
+        vipCard.append(button);
+      }
+      if(vipInviteValid&&!state.vipClaimed){
+        const already=document.createElement('button');
+        already.className='btn secondary';
+        already.textContent='Already Received from PastelTigger? Mark Claimed';
+        already.addEventListener('click',()=>{
           state.vipClaimed=true;
           save();
           trackOnce('vip_carousel_boots_claimed','VIP Carousel Boots claimed');
           renderRecords();
         });
-        vipCard.append(button);
+        vipCard.append(already);
       }
       $('vip-record').replaceChildren(vipCard);
       $('vip-invite-note').textContent=state.vipClaimed
         ?'Your VIP Carousel Boots are marked CLAIMED in this browser. The House remembers.'
         :vipInviteValid
-          ?'Your private VIP invitation is verified! Once you have received your Carousel Boots from PastelTigger, confirm using the button below.'
+          ?'Your private VIP invitation is verified! Download your Carousel Boots below, or confirm if PastelTigger already sent them to you.'
           :vipInviteInvalid
             ?'This VIP invitation could not be verified. Please ask PastelTigger for a fresh redemption link.'
             :'VIP participants receive a private redemption link after submitting their creation.';
+    }
+    async function downloadVipBoots(button){
+      if(!vipInviteValid&&!state.vipClaimed)return;
+      button.disabled=true;
+      const original=button.textContent;
+      button.textContent='Preparing Your Boots…';
+      try{
+        const response=await fetch('downloads/vip-carousel-boots.package',{cache:'no-store'});
+        if(!response.ok)throw new Error('VIP package is not available yet');
+        const blob=await response.blob();
+        const signature=new TextDecoder('ascii').decode(await blob.slice(0,4).arrayBuffer());
+        if(signature!=='DBPF')throw new Error('VIP package could not be verified');
+        const url=URL.createObjectURL(blob);
+        const link=document.createElement('a');
+        link.href=url;
+        link.download='[PP] Simblreen 2026_Carasole Thiigh High Boots.package';
+        document.body.append(link);
+        link.click();
+        link.remove();
+        setTimeout(()=>URL.revokeObjectURL(url),30000);
+        if(!state.vipClaimed){
+          state.vipClaimed=true;
+          save();
+          trackOnce('vip_carousel_boots_claimed','VIP Carousel Boots claimed');
+        }
+        renderRecords();
+      }catch(error){
+        button.textContent='Not Ready · Try Again Later';
+        const note=$('vip-invite-note');
+        note.textContent='The Carousel Boots download is not available here yet. If you already received the OneDrive gift, use the confirmation button instead.';
+        setTimeout(()=>{button.textContent=original;button.disabled=false},3500);
+        return;
+      }
+      button.disabled=false;
     }
     async function openVipInvitation(){
       const token=new URLSearchParams(window.location.hash.slice(1)).get('vip');
